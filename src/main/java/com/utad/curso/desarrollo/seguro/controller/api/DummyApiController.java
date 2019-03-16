@@ -24,7 +24,7 @@ import com.utad.curso.desarrollo.seguro.dto.DummyResponseDto;
 /**
  * Controlador API REST de prueba.
  * 
- * @author Juanjo
+ * @author josemif
  *
  */
 @RestController
