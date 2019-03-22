@@ -3,7 +3,7 @@ package com.utad.curso.desarrollo.seguro.dto;
 public class DummyResponseDto {
 
 	/**
-	 * Success.
+	 * Success..
 	 */
 	private Boolean success;
 

@@ -1,4 +1,4 @@
-package com.utad.curso.desarrollo.seguro.controller.api;
+package com.utad.curso.desarrollo.seguro.dto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -15,10 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.utad.curso.desarrollo.seguro.dto.DummyRequestBodyDto;
-import com.utad.curso.desarrollo.seguro.dto.DummyRequestBodySubAttributeDto;
-import com.utad.curso.desarrollo.seguro.dto.DummyResponseDto;
 
 /**
  * Controlador API REST de prueba.
@@ -40,7 +36,7 @@ public class DummyApiController {
 			@PathVariable(name = "path-var1", required = true) @NotBlank @Pattern(regexp = "[0-9]") String param3,
 			@PathVariable(name = "path-var2", required = true) @NotBlank String param4) {
 
-		logger.info("Request: GET /api/dummy/dummy-get");
+		logger.info("Request: GET /api/dummy/dummy-get ");
 		logger.info(param1);
 		logger.info(param2.toString());
 		logger.info(param3);
