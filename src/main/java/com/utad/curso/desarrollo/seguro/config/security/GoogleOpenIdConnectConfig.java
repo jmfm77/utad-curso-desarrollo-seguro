@@ -15,38 +15,37 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 @EnableOAuth2Client
 public class GoogleOpenIdConnectConfig {
 
-    @Value("755813577732-b7rn18mok1ain0a1e2qmhr326qbc3ded.apps.googleusercontent.com")
-    private String clientId;
+	@Value("1006741522645-nkdot4d1ksn5mits091ip1mukhf0k0ur.apps.googleusercontent.com")
+	private String clientId;
 
-    @Value("Hqb-zRXVuKckXgu38m8zpOI-")
-    private String clientSecret;
+	@Value("MKaW0Qohd33SqHDIZKBFM4c1")
+	private String clientSecret;
 
-    @Value("https://accounts.google.com/o/oauth2/auth")
-    private String userAuthorizationUri;
+	@Value("https://accounts.google.com/o/oauth2/auth")
+	private String userAuthorizationUri;
 
-    @Value("https://www.googleapis.com/oauth2/v3/token")
-    private String accessTokenUri;
+	@Value("https://www.googleapis.com/oauth2/v3/token")
+	private String accessTokenUri;
 
-    @Value("https://curso-desarrollo-seguro.com/oauth2-callback")
-    private String redirectUri;
+	@Value("https://curso-desarrollo-seguro.com/oauth2-callback")
+	private String redirectUri;
 
-    @Bean
-    public OAuth2ProtectedResourceDetails googleOpenId() {
-        final AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
-        details.setClientId(clientId);
-        details.setClientSecret(clientSecret);
-        details.setUserAuthorizationUri(userAuthorizationUri);
-        details.setAccessTokenUri(accessTokenUri);
-        details.setScope(Arrays.asList("openid", "email"));
-        details.setPreEstablishedRedirectUri(redirectUri);
-        details.setUseCurrentUri(false);
-        return details;
-    }
+	@Bean
+	public OAuth2ProtectedResourceDetails googleOpenId() {
+		final AuthorizationCodeResourceDetails details = new AuthorizationCodeResourceDetails();
+		details.setClientId(clientId);
+		details.setClientSecret(clientSecret);
+		details.setUserAuthorizationUri(userAuthorizationUri);
+		details.setAccessTokenUri(accessTokenUri);
+		details.setScope(Arrays.asList("openid", "email"));
+		details.setPreEstablishedRedirectUri(redirectUri);
+		details.setUseCurrentUri(false);
+		return details;
+	}
 
-    @Bean
-    public OAuth2RestTemplate googleOpenIdTemplate(
-            OAuth2ClientContext clientContext) {
-        return new OAuth2RestTemplate(googleOpenId(), clientContext);
-    }
+	@Bean
+	public OAuth2RestTemplate googleOpenIdTemplate(OAuth2ClientContext clientContext) {
+		return new OAuth2RestTemplate(googleOpenId(), clientContext);
+	}
 
 }
