@@ -48,4 +48,11 @@ public class BankAccountsService {
 
     }
 
+    public void deleteByIban(
+            String iban) {
+
+        bankAccountsRepository.deleteByIban(iban);
+
+    }
+
 }
