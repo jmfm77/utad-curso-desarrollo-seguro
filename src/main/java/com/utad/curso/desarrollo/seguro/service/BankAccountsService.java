@@ -66,4 +66,30 @@ public class BankAccountsService {
 
     }
 
+    public BankAccountDto depositFunds(
+            String iban,
+            Double funds) {
+
+        BankAccountEntity bankAccountEntity = bankAccountsRepository.findByIban(iban);
+        bankAccountEntity.setBalance(bankAccountEntity.getBalance() + funds);
+
+        BankAccountDto bankAccountDto = bankAccountsMapper.toDto(bankAccountEntity);
+
+        return bankAccountDto;
+
+    }
+
+    public BankAccountDto withdrawFunds(
+            String iban,
+            Double funds) {
+
+        BankAccountEntity bankAccountEntity = bankAccountsRepository.findByIban(iban);
+        bankAccountEntity.setBalance(bankAccountEntity.getBalance() - funds);
+
+        BankAccountDto bankAccountDto = bankAccountsMapper.toDto(bankAccountEntity);
+
+        return bankAccountDto;
+
+    }
+
 }

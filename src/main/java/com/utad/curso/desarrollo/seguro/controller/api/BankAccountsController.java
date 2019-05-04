@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.utad.curso.desarrollo.seguro.dto.BankAccountDto;
 import com.utad.curso.desarrollo.seguro.dto.DeleteBankAccountDto;
+import com.utad.curso.desarrollo.seguro.dto.FundsDto;
 import com.utad.curso.desarrollo.seguro.dto.SuccessDto;
 import com.utad.curso.desarrollo.seguro.service.BankAccountsService;
 
@@ -45,6 +46,20 @@ public class BankAccountsController {
 		bankAccountsService.deleteByIban(deleteBankAccountDto.getIban());
 
 		return new SuccessDto(true);
+
+	}
+
+	@PostMapping("/deposit-funds")
+	public BankAccountDto depositFunds(@RequestBody(required = true) @Valid FundsDto fundsDto) {
+
+		return bankAccountsService.depositFunds(fundsDto.getIban(), fundsDto.getFunds());
+
+	}
+
+	@PostMapping("/withdraw-funds")
+	public BankAccountDto withdrawFunds(@RequestBody(required = true) @Valid FundsDto fundsDto) {
+
+		return bankAccountsService.withdrawFunds(fundsDto.getIban(), fundsDto.getFunds());
 
 	}
 
