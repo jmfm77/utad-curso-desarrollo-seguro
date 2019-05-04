@@ -12,6 +12,7 @@ import com.utad.curso.desarrollo.seguro.entity.BankAccountEntity;
 import com.utad.curso.desarrollo.seguro.exception.BusinessLogicException;
 import com.utad.curso.desarrollo.seguro.mapper.BankAccountsMapper;
 import com.utad.curso.desarrollo.seguro.repository.BankAccountsRepository;
+import com.utad.curso.desarrollo.seguro.repository.UsersRepository;
 import com.utad.curso.desarrollo.seguro.utils.IbanService;
 
 @Service
@@ -25,13 +26,18 @@ public class BankAccountsService {
     private BankAccountsMapper bankAccountsMapper;
 
     @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
     private IbanService ibanService;
 
-    public BankAccountDto create() {
+    public BankAccountDto create(
+            Long userId) {
 
         BankAccountEntity bankAccountEntity = new BankAccountEntity();
         bankAccountEntity.setIban(ibanService.randomIban());
         bankAccountEntity.setBalance(0.0);
+        bankAccountEntity.setOwner(usersRepository.findOne(userId));
         bankAccountEntity = bankAccountsRepository.save(bankAccountEntity);
 
         BankAccountDto bankAccountDto = bankAccountsMapper.toDto(bankAccountEntity);
@@ -43,6 +49,16 @@ public class BankAccountsService {
     public List<BankAccountDto> getAll() {
 
         List<BankAccountEntity> bankAccountEntities = bankAccountsRepository.findAll();
+        List<BankAccountDto> bankAccountDtos = bankAccountsMapper.toDto(bankAccountEntities);
+
+        return bankAccountDtos;
+
+    }
+
+    public List<BankAccountDto> getByOwner(
+            Long userId) {
+
+        List<BankAccountEntity> bankAccountEntities = bankAccountsRepository.findByOwnerUserId(userId);
         List<BankAccountDto> bankAccountDtos = bankAccountsMapper.toDto(bankAccountEntities);
 
         return bankAccountDtos;

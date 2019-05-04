@@ -2,6 +2,8 @@ package com.utad.curso.desarrollo.seguro.config.security;
 
 import java.util.Arrays;
 
+import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,23 +15,33 @@ import com.utad.curso.desarrollo.seguro.dto.UserDto;
 import com.utad.curso.desarrollo.seguro.service.UsersService;
 
 @Configuration
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService
+        implements UserDetailsService {
 
-	@Autowired
-	private UsersService usersService;
+    @Autowired
+    private UsersService usersService;
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    @Autowired
+    private HttpSession httpSession;
 
-		UserDto user = usersService.getByUsername(username);
+    @Override
+    public UserDetails loadUserByUsername(
+            String username)
+            throws UsernameNotFoundException {
 
-		if (user == null) {
-			throw new UsernameNotFoundException("");
-		}
+        UserDto user = usersService.getByUsername(username);
 
-		return new org.springframework.security.core.userdetails.User(username, user.getPassword(),
-				Arrays.asList(new SimpleGrantedAuthority(user.getRole())));
+        if (user == null) {
+            throw new UsernameNotFoundException("");
+        }
 
-	}
+        httpSession.setAttribute("user-id", user.getUserId());
+
+        return new org.springframework.security.core.userdetails.User(
+                username,
+                user.getPassword(),
+                Arrays.asList(new SimpleGrantedAuthority(user.getRole())));
+
+    }
 
 }

@@ -2,6 +2,7 @@ package com.utad.curso.desarrollo.seguro.controller.api;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,44 +24,61 @@ import com.utad.curso.desarrollo.seguro.service.BankAccountsService;
 @Validated
 public class BankAccountsController {
 
-	@Autowired
-	private BankAccountsService bankAccountsService;
+    @Autowired
+    private BankAccountsService bankAccountsService;
 
-	@PostMapping("/create")
-	public BankAccountDto create() {
+    @Autowired
+    private HttpSession httpSession;
 
-		return bankAccountsService.create();
+    @PostMapping("/create")
+    public BankAccountDto create() {
 
-	}
+        Long userId = (Long) httpSession.getAttribute("user-id");
 
-	@GetMapping("/get-all")
-	public List<BankAccountDto> getAll() {
+        return bankAccountsService.create(userId);
 
-		return bankAccountsService.getAll();
+    }
 
-	}
+    @GetMapping("/get-all")
+    public List<BankAccountDto> getAll() {
 
-	@PostMapping("/delete")
-	public SuccessDto delete(@RequestBody(required = true) @Valid DeleteBankAccountDto deleteBankAccountDto) {
+        return bankAccountsService.getAll();
 
-		bankAccountsService.deleteByIban(deleteBankAccountDto.getIban());
+    }
 
-		return new SuccessDto(true);
+    @GetMapping("/get-all-my-accounts")
+    public List<BankAccountDto> getAllMyAccounts() {
 
-	}
+        Long userId = (Long) httpSession.getAttribute("user-id");
 
-	@PostMapping("/deposit-funds")
-	public BankAccountDto depositFunds(@RequestBody(required = true) @Valid FundsDto fundsDto) {
+        return bankAccountsService.getByOwner(userId);
 
-		return bankAccountsService.depositFunds(fundsDto.getIban(), fundsDto.getFunds());
+    }
 
-	}
+    @PostMapping("/delete")
+    public SuccessDto delete(
+            @RequestBody(required = true) @Valid DeleteBankAccountDto deleteBankAccountDto) {
 
-	@PostMapping("/withdraw-funds")
-	public BankAccountDto withdrawFunds(@RequestBody(required = true) @Valid FundsDto fundsDto) {
+        bankAccountsService.deleteByIban(deleteBankAccountDto.getIban());
 
-		return bankAccountsService.withdrawFunds(fundsDto.getIban(), fundsDto.getFunds());
+        return new SuccessDto(true);
 
-	}
+    }
+
+    @PostMapping("deposit-funds")
+    public BankAccountDto depositFunds(
+            @RequestBody(required = true) @Valid FundsDto fundsDto) {
+
+        return bankAccountsService.depositFunds(fundsDto.getIban(), fundsDto.getFunds());
+
+    }
+
+    @PostMapping("withdraw-funds")
+    public BankAccountDto withdrawFunds(
+            @RequestBody(required = true) @Valid FundsDto fundsDto) {
+
+        return bankAccountsService.withdrawFunds(fundsDto.getIban(), fundsDto.getFunds());
+
+    }
 
 }
