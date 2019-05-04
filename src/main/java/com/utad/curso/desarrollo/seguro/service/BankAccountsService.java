@@ -1,5 +1,7 @@
 package com.utad.curso.desarrollo.seguro.service;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,15 @@ public class BankAccountsService {
         BankAccountDto bankAccountDto = bankAccountsMapper.toDto(bankAccountEntity);
 
         return bankAccountDto;
+
+    }
+
+    public List<BankAccountDto> getAll() {
+
+        List<BankAccountEntity> bankAccountEntities = bankAccountsRepository.findAll();
+        List<BankAccountDto> bankAccountDtos = bankAccountsMapper.toDto(bankAccountEntities);
+
+        return bankAccountDtos;
 
     }
 

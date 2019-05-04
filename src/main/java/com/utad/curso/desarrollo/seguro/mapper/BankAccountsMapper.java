@@ -1,5 +1,8 @@
 package com.utad.curso.desarrollo.seguro.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.utad.curso.desarrollo.seguro.dto.BankAccountDto;
@@ -21,6 +24,24 @@ public class BankAccountsMapper {
         bankAccountDto.setBalance(bankAccountEntity.getBalance());
 
         return bankAccountDto;
+
+    }
+
+    public List<BankAccountDto> toDto(
+            List<BankAccountEntity> bankAccountEntities) {
+
+        if (bankAccountEntities == null) {
+            return null;
+        }
+
+        List<BankAccountDto> bankAccountDtos = new ArrayList<>(bankAccountEntities.size());
+
+        for (BankAccountEntity bankAccountEntity : bankAccountEntities) {
+            BankAccountDto bankAccountDto = toDto(bankAccountEntity);
+            bankAccountDtos.add(bankAccountDto);
+        }
+
+        return bankAccountDtos;
 
     }
 
