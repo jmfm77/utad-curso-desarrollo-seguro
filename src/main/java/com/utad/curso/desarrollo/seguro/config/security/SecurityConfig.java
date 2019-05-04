@@ -1,60 +1,151 @@
 package com.utad.curso.desarrollo.seguro.config.security;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.utad.curso.desarrollo.seguro.dto.SuccessDto;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig
+        extends WebSecurityConfigurerAdapter {
 
-	@Autowired
-	private UserDetailsService userDetailsService; // será la clase CustomUserDetailServices
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder; // será CustomPasswordEncoder
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Autowired
+    private ObjectMapper objectMapper;
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+    @Autowired
+    private Validator validator;
 
-		// Login and Logout.
-		http.formLogin().loginPage("/login").loginProcessingUrl("/login").defaultSuccessUrl("/")
-				.failureUrl("/login?failure=true").and().logout().logoutUrl("/logout").logoutSuccessUrl("/login");
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-		// Authentication Provider.
-		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-		authProvider.setUserDetailsService(userDetailsService); // como hacer para probar las credenciales
-		authProvider.setPasswordEncoder(passwordEncoder);
-		http.authenticationProvider(authProvider);
+    @Bean
+    public AuthenticationFilter authenticationFilter()
+            throws Exception {
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(objectMapper, validator);
+        authenticationFilter.setFilterProcessesUrl("/api/session/login");
+        authenticationFilter.setAuthenticationSuccessHandler(this::loginSuccessHandler);
+        authenticationFilter.setAuthenticationFailureHandler(this::loginFailureHandler);
+        authenticationFilter.setAuthenticationManager(authenticationManagerBean());
+        return authenticationFilter;
+    }
 
-		// Authorization.
-		http.authorizeRequests()
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        return authenticationProvider;
+    }
 
-				// Allow Base URLs
-				.and().authorizeRequests().antMatchers("/login").permitAll() // se permite a todo el mundo
-				.and().authorizeRequests().antMatchers("/logout").permitAll()// se permite a todo el mundo
+    @Override
+    protected void configure(
+            HttpSecurity http)
+            throws Exception {
 
-				// Require Authentication for any other URL
-				.and().authorizeRequests().anyRequest().fullyAuthenticated(); // para acceder al resto se debe estar
-																				// autenticado
+        // Login and Logout.
+        http
+                .addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .logout().logoutUrl("/api/session/logout").logoutSuccessHandler(this::logoutSuccessHandler)
+                .and().exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
 
-		// CSRF.
-		http.csrf().disable();
+        // Authentication Provider.
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder);
+        http.authenticationProvider(authProvider);
 
-	}
+        // Authorization.
+        http.authorizeRequests()
+
+                // Allow Base URLs
+                .and().authorizeRequests().antMatchers("/api/session/login").permitAll()
+                .and().authorizeRequests().antMatchers("/api/session/logout").permitAll()
+                .and().authorizeRequests().antMatchers("/api/session/info").permitAll()
+
+                // Require Authentication for any other URL
+                .and().authorizeRequests().anyRequest().fullyAuthenticated();
+
+        // CSRF.
+        http.csrf().disable();
+
+    }
+
+    private void loginSuccessHandler(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication)
+            throws IOException {
+
+        // Change session tokens (avoid fixation).
+        try {
+            request.changeSessionId();
+        } catch (IllegalStateException e) {
+        }
+
+        // Return an object indicating that the login was successful.
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+        objectMapper.writeValue(response.getWriter(), new SuccessDto(true));
+
+    }
+
+    private void loginFailureHandler(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException e)
+            throws IOException {
+
+        // Return an object indicating that the login was unsuccessful.
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+        objectMapper.writeValue(response.getWriter(), new SuccessDto(false));
+
+    }
+
+    private void logoutSuccessHandler(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication)
+            throws IOException {
+
+        // Return an object indicating that the logout was successful.
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_UTF8_VALUE);
+        objectMapper.writeValue(response.getWriter(), new SuccessDto(true));
+
+    }
 
 }

@@ -1,4 +1,4 @@
-package com.utad.curso.desarrollo.seguro.entiy;
+package com.utad.curso.desarrollo.seguro.entity;
 
 //
 import javax.persistence.Column;
