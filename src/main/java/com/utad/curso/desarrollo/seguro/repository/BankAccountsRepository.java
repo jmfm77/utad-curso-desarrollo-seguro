@@ -7,7 +7,7 @@ import com.utad.curso.desarrollo.seguro.entity.BankAccountEntity;
 public interface BankAccountsRepository
         extends JpaRepository<BankAccountEntity, Long> {
 
-    void deleteByIban(
+    BankAccountEntity findByIban(
             String iban);
 
 }

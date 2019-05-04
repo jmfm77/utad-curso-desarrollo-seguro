@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.utad.curso.desarrollo.seguro.dto.BankAccountDto;
 import com.utad.curso.desarrollo.seguro.entity.BankAccountEntity;
+import com.utad.curso.desarrollo.seguro.exception.BusinessLogicException;
 import com.utad.curso.desarrollo.seguro.mapper.BankAccountsMapper;
 import com.utad.curso.desarrollo.seguro.repository.BankAccountsRepository;
 import com.utad.curso.desarrollo.seguro.utils.IbanService;
@@ -51,7 +52,17 @@ public class BankAccountsService {
     public void deleteByIban(
             String iban) {
 
-        bankAccountsRepository.deleteByIban(iban);
+        BankAccountEntity bankAccountEntity = bankAccountsRepository.findByIban(iban);
+
+        if (bankAccountEntity == null) {
+            throw new BusinessLogicException("account-does-not-exist");
+        }
+
+        if (bankAccountEntity.getBalance() > 0) {
+            throw new BusinessLogicException("account-has-funds");
+        }
+
+        bankAccountsRepository.delete(bankAccountEntity);
 
     }
 
