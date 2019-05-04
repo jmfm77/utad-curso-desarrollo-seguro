@@ -6,6 +6,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,61 +25,60 @@ import com.utad.curso.desarrollo.seguro.service.BankAccountsService;
 @Validated
 public class BankAccountsController {
 
-    @Autowired
-    private BankAccountsService bankAccountsService;
+	@Autowired
+	private BankAccountsService bankAccountsService;
 
-    @Autowired
-    private HttpSession httpSession;
+	@Autowired
+	private HttpSession httpSession;
 
-    @PostMapping("/create")
-    public BankAccountDto create() {
+	@PostMapping("/create")
+	public BankAccountDto create() {
 
-        Long userId = (Long) httpSession.getAttribute("user-id");
+		Long userId = (Long) httpSession.getAttribute("user-id");
 
-        return bankAccountsService.create(userId);
+		return bankAccountsService.create(userId);
 
-    }
+	}
 
-    @GetMapping("/get-all")
-    public List<BankAccountDto> getAll() {
+	@GetMapping("/get-all")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public List<BankAccountDto> getAll() {
 
-        return bankAccountsService.getAll();
+		return bankAccountsService.getAll();
 
-    }
+	}
 
-    @GetMapping("/get-all-my-accounts")
-    public List<BankAccountDto> getAllMyAccounts() {
+	@GetMapping("/get-all-my-accounts")
+	public List<BankAccountDto> getAllMyAccounts() {
 
-        Long userId = (Long) httpSession.getAttribute("user-id");
+		Long userId = (Long) httpSession.getAttribute("user-id");
 
-        return bankAccountsService.getByOwner(userId);
+		return bankAccountsService.getByOwner(userId);
 
-    }
+	}
 
-    @PostMapping("/delete")
-    public SuccessDto delete(
-            @RequestBody(required = true) @Valid DeleteBankAccountDto deleteBankAccountDto) {
+	@PostMapping("/delete")
+	public SuccessDto delete(@RequestBody(required = true) @Valid DeleteBankAccountDto deleteBankAccountDto) {
 
-        bankAccountsService.deleteByIban(deleteBankAccountDto.getIban());
+		bankAccountsService.deleteByIban(deleteBankAccountDto.getIban());
 
-        return new SuccessDto(true);
+		return new SuccessDto(true);
 
-    }
+	}
 
-    @PostMapping("deposit-funds")
-    public BankAccountDto depositFunds(
-            @RequestBody(required = true) @Valid FundsDto fundsDto) {
+	@PostMapping("deposit-funds")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public BankAccountDto depositFunds(@RequestBody(required = true) @Valid FundsDto fundsDto) {
 
-        return bankAccountsService.depositFunds(fundsDto.getIban(), fundsDto.getFunds());
+		return bankAccountsService.depositFunds(fundsDto.getIban(), fundsDto.getFunds());
 
-    }
+	}
 
-    @PostMapping("withdraw-funds")
-    public BankAccountDto withdrawFunds(
-            @RequestBody(required = true) @Valid FundsDto fundsDto) {
+	@PostMapping("withdraw-funds")
+	public BankAccountDto withdrawFunds(@RequestBody(required = true) @Valid FundsDto fundsDto) {
 
-        return bankAccountsService.withdrawFunds(fundsDto.getIban(), fundsDto.getFunds());
+		return bankAccountsService.withdrawFunds(fundsDto.getIban(), fundsDto.getFunds());
 
-    }
+	}
 
 }
